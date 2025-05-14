@@ -2,6 +2,7 @@
 bin/
 obj/
 out/
+v17/
 
 # User-specific files
 *.user
