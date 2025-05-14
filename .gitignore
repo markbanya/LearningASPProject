@@ -1,0 +1,50 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code files
+.vscode/
+
+# Visual Studio working folder
+.vs/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# ASP.NET
+appsettings.*.json
+
+# DotCover
+*.dcvr
+
+# Rider
+.idea/
+
+# Resharper
+*.DotSettings.user
+
+# .NET secrets
+secrets.json
+
+# Others
+*.dbmdl
