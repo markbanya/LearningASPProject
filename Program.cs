@@ -1,15 +1,18 @@
+using LearningProjectASP.Data;
+using LearningProjectASP.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -18,8 +21,40 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.MapGet("/api/todo", async (AppDbContext db) =>
+    await db.ToDoItems.ToListAsync());
 
-app.MapControllers();
+app.MapPost("/api/todo", async (ToDoItem newItem, AppDbContext db) =>
+{
+    db.ToDoItems.Add(newItem);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/todo/{newItem.Id}", newItem);
+});
+
+app.MapPut("/api/todo/{id}/complete", async (int id, AppDbContext db) =>
+{
+    var item = await db.ToDoItems.FindAsync(id);
+    if (item == null)
+    {
+        return Results.NotFound();
+    }
+
+    item.IsCompleted = true;
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+app.MapDelete("/api/todo/{id}", async (int id, AppDbContext db) =>
+{
+    var item = await db.ToDoItems.FindAsync(id);
+    if (item == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.ToDoItems.Remove(item);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
 
 app.Run();
