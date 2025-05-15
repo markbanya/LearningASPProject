@@ -1,0 +1,2 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+DELETE https://localhost:7290/api/todo/3
