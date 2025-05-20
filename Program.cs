@@ -1,5 +1,6 @@
 using LearningProjectASP.Data;
-using LearningProjectASP.Models;
+using LearningProjectASP.Endpoints.ToDo;
+using LearningProjectASP.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IToDoService, ToDoService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -20,41 +23,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapToDoEndpoints();
 
-app.MapGet("/api/todo", async (AppDbContext db) =>
-    await db.ToDoItems.ToListAsync());
-
-app.MapPost("/api/todo", async (ToDoItem newItem, AppDbContext db) =>
-{
-    db.ToDoItems.Add(newItem);
-    await db.SaveChangesAsync();
-    return Results.Created($"/api/todo/{newItem.Id}", newItem);
-});
-
-app.MapPut("/api/todo/{id}/complete", async (int id, AppDbContext db) =>
-{
-    var item = await db.ToDoItems.FindAsync(id);
-    if (item == null)
-    {
-        return Results.NotFound();
-    }
-
-    item.IsCompleted = true;
-    await db.SaveChangesAsync();
-    return Results.NoContent();
-});
-
-app.MapDelete("/api/todo/{id}", async (int id, AppDbContext db) =>
-{
-    var item = await db.ToDoItems.FindAsync(id);
-    if (item == null)
-    {
-        return Results.NotFound();
-    }
-
-    db.ToDoItems.Remove(item);
-    await db.SaveChangesAsync();
-    return Results.NoContent();
-});
 
 app.Run();
