@@ -1,6 +1,7 @@
 using LearningProjectASP.Data;
 using LearningProjectASP.Models;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace LearningProjectASP.Services
 {
@@ -25,6 +26,7 @@ namespace LearningProjectASP.Services
 
         public async Task<User> CreateAsync(User user)
         {
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
             return user;
@@ -37,7 +39,12 @@ namespace LearningProjectASP.Services
 
             user.Username = updatedUser.Username;
             user.Role = updatedUser.Role;
-            // Update password hash if needed
+
+            if (!string.IsNullOrWhiteSpace(updatedUser.PasswordHash))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updatedUser.PasswordHash);
+            }
+
             await _db.SaveChangesAsync();
             return true;
         }
