@@ -1,5 +1,5 @@
 using LearningProjectASP.Data;
-using LearningProjectASP.Endpoints.ToDo;
+using LearningProjectASP.Endpoints;
 using LearningProjectASP.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IToDoService, ToDoService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -24,6 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapToDoEndpoints();
+app.MapUserEndpoints();
 
 
 app.Run();

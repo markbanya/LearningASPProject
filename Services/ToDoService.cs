@@ -23,7 +23,7 @@ namespace LearningProjectASP.Services
             return item;
         }
 
-        public async Task<bool> CompleteAsync(int id)
+        public async Task<bool> MarkCompleteAsync(int id)
         {
             var item = await _db.ToDoItems.FindAsync(id);
             if (item == null)
