@@ -1,6 +1,5 @@
 ﻿using LearningProjectASP.Models;
 using LearningProjectASP.Services;
-using Microsoft.AspNetCore.Builder;
 
 namespace LearningProjectASP.Endpoints
 {

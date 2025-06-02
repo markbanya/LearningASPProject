@@ -1,7 +1,6 @@
 using LearningProjectASP.Data;
 using LearningProjectASP.Models;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
 
 namespace LearningProjectASP.Services
 {
@@ -35,7 +34,10 @@ namespace LearningProjectASP.Services
         public async Task<bool> UpdateAsync(int id, User updatedUser)
         {
             var user = await _db.Users.FindAsync(id);
-            if (user == null) return false;
+            if (user == null)
+            {
+                return false;
+            }
 
             user.Username = updatedUser.Username;
             user.Role = updatedUser.Role;
@@ -52,7 +54,10 @@ namespace LearningProjectASP.Services
         public async Task<bool> DeleteAsync(int id)
         {
             var user = await _db.Users.FindAsync(id);
-            if (user == null) return false;
+            if (user == null)
+            {
+                return false;
+            }
 
             _db.Users.Remove(user);
             await _db.SaveChangesAsync();

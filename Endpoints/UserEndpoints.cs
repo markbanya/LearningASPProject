@@ -1,6 +1,7 @@
 using LearningProjectASP.Models;
 using LearningProjectASP.Services;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace LearningProjectASP.Endpoints
 {
@@ -35,6 +36,13 @@ namespace LearningProjectASP.Endpoints
             {
                 var deleted = await userService.DeleteAsync(id);
                 return deleted ? Results.NoContent() : Results.NotFound();
+            });
+
+            group.MapGet("/me", [Authorize] (ClaimsPrincipal user) =>
+            {
+                var name = user.Identity?.Name;
+                var role = user.FindFirst(ClaimTypes.Role)?.Value;
+                return Results.Ok(new { name, role });
             });
         }
     }

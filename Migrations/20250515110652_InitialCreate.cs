@@ -20,10 +20,7 @@ namespace LearningProjectASP.Migrations
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ToDoItems", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_ToDoItems", x => x.Id));
         }
 
         /// <inheritdoc />
