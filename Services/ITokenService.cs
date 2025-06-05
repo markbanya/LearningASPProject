@@ -4,6 +4,6 @@ namespace LearningProjectASP.Services
 {
     public interface ITokenService
     {
-        string CreateToken(User user);
+        Task<string> GenerateTokenAsync(AppUser user);
     }
 }

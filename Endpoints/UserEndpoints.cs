@@ -1,7 +1,8 @@
+using LearningProjectASP.Dto;
 using LearningProjectASP.Models;
 using LearningProjectASP.Services;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace LearningProjectASP.Endpoints
 {
@@ -11,39 +12,93 @@ namespace LearningProjectASP.Endpoints
         {
             var group = app.MapGroup("/api/users");
 
-            group.MapGet("/", async (IUserService userService) =>
-                await userService.GetAllAsync());
+            group.MapPost("/register", RegisterUser);
+            group.MapPost("/login", LoginUser);
 
-            group.MapGet("/{id}", async (int id, IUserService userService) =>
-            {
-                var user = await userService.GetByIdAsync(id);
-                return user is not null ? Results.Ok(user) : Results.NotFound();
-            });
-
-            group.MapPost("/", async (User user, IUserService userService) =>
-            {
-                var created = await userService.CreateAsync(user);
-                return Results.Created($"/api/users/{created.Id}", created);
-            });
-
-            group.MapPut("/{id}", async (int id, User updatedUser, IUserService userService) =>
-            {
-                var updated = await userService.UpdateAsync(id, updatedUser);
-                return updated ? Results.NoContent() : Results.NotFound();
-            });
-
-            group.MapDelete("/{id}", async (int id, IUserService userService) =>
-            {
-                var deleted = await userService.DeleteAsync(id);
-                return deleted ? Results.NoContent() : Results.NotFound();
-            });
-
-            group.MapGet("/me", [Authorize] (ClaimsPrincipal user) =>
-            {
-                var name = user.Identity?.Name;
-                var role = user.FindFirst(ClaimTypes.Role)?.Value;
-                return Results.Ok(new { name, role });
-            });
+            group.MapGet("/{id}", GetUserById).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+            group.MapPut("/{id}", UpdateUser).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+            group.MapDelete("/{id}", DeleteUser).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
         }
+
+        private static async Task<IResult> RegisterUser(AppUserDto userDto, UserManager<AppUser> userManager)
+        {
+            var user = new AppUser
+            {
+                UserName = userDto.Email,
+                Email = userDto.Email,
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName
+            };
+
+            var result = await userManager.CreateAsync(user, userDto.Password);
+
+            if (!result.Succeeded)
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            await userManager.AddToRoleAsync(user, "User");
+
+            return Results.Ok("User created");
+        }
+
+
+        private static async Task<IResult> LoginUser(
+                LoginRequestDto loginDto,
+                UserManager<AppUser> userManager,
+                SignInManager<AppUser> signInManager,
+                ITokenService jwtService)
+        {
+            var user = await userManager.FindByEmailAsync(loginDto.Email);
+            if (user == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            if (!result.Succeeded)
+            {
+                return Results.Unauthorized();
+            }
+
+            var token = await jwtService.GenerateTokenAsync(user);
+            return Results.Ok(new { Token = token });
+        }
+
+        private static async Task<IResult> GetUserById(string id, UserManager<AppUser> userManager)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            return user != null ? Results.Ok(user) : Results.NotFound();
+        }
+
+        private static async Task<IResult> UpdateUser(string id, AppUserDto updatedDto, UserManager<AppUser> userManager)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return Results.NotFound();
+            }
+
+            user.FirstName = updatedDto.FirstName;
+            user.LastName = updatedDto.LastName;
+            user.Email = updatedDto.Email;
+            user.UserName = updatedDto.Email;
+
+            var result = await userManager.UpdateAsync(user);
+            return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
+        }
+        private static async Task<IResult> DeleteUser(string id, UserManager<AppUser> userManager)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return Results.NotFound();
+            }
+
+            var result = await userManager.DeleteAsync(user);
+            return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
+        }
+
     }
+
 }

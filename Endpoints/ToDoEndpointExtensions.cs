@@ -7,7 +7,8 @@ namespace LearningProjectASP.Endpoints
     {
         public static void MapToDoEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/api/todo");
+            var group = app.MapGroup("/api/todo")
+                        .RequireAuthorization();
 
             group.MapGet("/", async (IToDoService toDoService) =>
                 await toDoService.GetAllAsync());
