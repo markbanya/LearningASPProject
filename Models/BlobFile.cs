@@ -13,9 +13,6 @@ namespace LearningProjectASP.Models
         public DateTime Updated { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public string MetadataJson { get; set; } = "{}";
-
-        [Required]
         public byte[] Data { get; set; } = [];
     }
 }
