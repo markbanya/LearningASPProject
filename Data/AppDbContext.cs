@@ -12,5 +12,7 @@ namespace LearningProjectASP.Data
         }
 
         public DbSet<ToDoItem> ToDoItems { get; set; }
+        public DbSet<BlobFile> Blobs { get; set; }
+
     }
 }

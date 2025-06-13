@@ -72,8 +72,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<IToDoService, ToDoService>();
-//builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IBlobService, BlobService>();
+
 
 var app = builder.Build();
 
@@ -95,5 +96,7 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapToDoEndpoints();
 app.MapUserEndpoints();
+app.MapBlobEndpoints();
+
 
 app.Run();
